@@ -6,7 +6,7 @@ dotenv.config({
 });
 
 connectDataBaseMongoDB()
-  .then(console.log("MongoDb Connected!!!!"))
+  .then((item) => console.log(item))
   .catch((error) => {
     console.error(error);
   });
