@@ -1,4 +1,3 @@
-import { Multer } from "multer";
 import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -17,7 +16,8 @@ const uploadOnCloudinary = async (filePath) => {
     const response = await cloudinary.uploader.upload(filePath, {
       resource_type: "auto",
     });
-    console.log(response);
+    fs.unlinkSync(filePath);
+    return response;
   } catch (error) {
     fs.unlinkSync(filePath);
   }

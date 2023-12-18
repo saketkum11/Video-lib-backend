@@ -36,7 +36,7 @@ const userSchema = new Schema(
       require: true,
     },
     refresToken: {
-      type: string,
+      type: String,
     },
     watchHistory: [
       {
