@@ -26,7 +26,14 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const avatar = req.files?.avatar[0]?.path;
-
+  let coverImageLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files?.coverImage.length > 0
+  ) {
+    coverImageLocalPath = req.files?.coverImage[0];
+  }
   if (!avatar) {
     throw new ApiErrorHandler(450, "avatar does exists");
   }
@@ -38,6 +45,7 @@ const registerUser = asyncHandler(async (req, res) => {
     fullName,
     email,
     password,
+    coverImage: coverImageLocalPath || "",
     username,
     avatar: avatarupload?.url,
   });
