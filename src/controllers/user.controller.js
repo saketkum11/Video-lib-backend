@@ -2,6 +2,19 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiErrorHandler } from "../utils/ApiErrorHandler.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
+
+const generateAccessAndRefreshToken = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    const access = user.generateAccessToken();
+    const refresh = user.generateRefereshToken();
+    user.refreshToken = refreshToken;
+    user.save();
+    return { access, refresh };
+  } catch (error) {
+    throw new ApiErrorHandler(400, "userId can be found in Database");
+  }
+};
 const registerUser = asyncHandler(async (req, res) => {
   // get user details from frontend
   // validation not empty field
@@ -57,4 +70,36 @@ const registerUser = asyncHandler(async (req, res) => {
   }
   return res.status(200).json({ createdUser });
 });
-export { registerUser };
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password, username } = req.body;
+  if (!(username || email)) {
+    throw new ApiErrorHandler(400, "username or email is required");
+  }
+  const user = await User.findOne({
+    $or: [{ username }, { email }],
+  });
+  if (!user) {
+    throw new ApiErrorHandler(404, "Username or email doesn't exits");
+  }
+  const userPassword = user.isPasswordCorrect(password);
+  if (!userPassword) {
+    throw new ApiErrorHandler(403, "Password invalid");
+  }
+  const { accessToken, refreshToken } = generateAccessAndRefreshToken(user._id);
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json({
+      username,
+      email,
+      accessToken,
+      refreshToken,
+    });
+});
+export { registerUser, loginUser };
