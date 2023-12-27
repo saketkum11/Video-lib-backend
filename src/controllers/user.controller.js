@@ -4,7 +4,6 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 const generateAccessAndRefreshToken = async (userId) => {
-  console.log("line no 7", userId);
   try {
     const user = await User.findById(userId);
     const accessToken = user.generateAccessToken();
