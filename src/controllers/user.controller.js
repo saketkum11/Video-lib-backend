@@ -85,7 +85,6 @@ const loginUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({
     $or: [{ username }, { email }],
   });
-  console.log("user id token", user._id);
   if (!user) {
     throw new ApiErrorHandler(404, "user  doesn't exits");
   }
