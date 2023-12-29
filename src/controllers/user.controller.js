@@ -3,6 +3,7 @@ import { ApiErrorHandler } from "../utils/ApiErrorHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
+import Jwt from "jsonwebtoken";
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -137,5 +138,38 @@ const logoutUser = asyncHandler(async (req, res) => {
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "User Logged Out"));
 });
+const updateRefreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingToken = req.cookies.refreshToken || req.body.refreshToken;
 
-export { registerUser, loginUser, logoutUser };
+  if (!incomingToken) {
+    throw new ApiErrorHandler(401, "unauthories token");
+  }
+  const decodedToken = Jwt.verify(
+    incomingToken,
+    process.env.REFRESH_TOKEN_SECRET
+  );
+  if (!decodedToken) {
+    throw new ApiErrorHandler(401, "refresh token secret unmatched");
+  }
+  const { accessToken, newRefreshToken } = await generateAccessAndRefreshToken(
+    decodedToken._id
+  );
+  const user = await User.findById(decodedToken._id);
+  if (!user) {
+    throw new ApiErrorHandler(401, "refresh token secret unmatched");
+  }
+  const option = {
+    httpOnly: true,
+    secure: true,
+  };
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, option)
+    .cookie("refreshToken", newRefreshToken, option)
+    .json(
+      new ApiResponse(200, { accessToken, newRefreshToken }),
+      " accesstoken refresh token are refreshed"
+    );
+});
+
+export { registerUser, loginUser, logoutUser, updateRefreshAccessToken };
