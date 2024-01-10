@@ -89,7 +89,8 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiErrorHandler(404, "user  doesn't exits");
   }
 
-  if (password !== user.password) {
+  const isPassword = await user.isPasswordCorrect(password);
+  if (!isPassword) {
     throw new ApiErrorHandler(401, "Invalid user credentails");
   }
 
@@ -171,5 +172,53 @@ const updateRefreshAccessToken = asyncHandler(async (req, res) => {
       " accesstoken refresh token are refreshed"
     );
 });
+const updatePassord = asyncHandler(async (req, res) => {
+  const { olderPassword, newPassword } = req.body;
+  console.log(olderPassword, newPassword);
+  if (!(olderPassword && newPassword)) {
+    throw new ApiErrorHandler(409, "Provide Older Passord and new Password");
+  }
+  const user = await User.findById(req.user?._id);
 
-export { registerUser, loginUser, logoutUser, updateRefreshAccessToken };
+  const userPassword = await user.isPasswordCorrect(olderPassword);
+  if (!userPassword) {
+    throw new ApiErrorHandler(409, "invalid old password");
+  }
+  user.password = newPassword;
+  user.save({ validateBeforeSave: false });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "SuccessFully Changed Password", user));
+});
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res.status(200).json(new ApiResponse(201, "User data", req.user));
+});
+const updateUserAccountDetails = asyncHandler(async (req, res) => {
+  const { fullName, email } = req.body;
+  if (!fullName || !email)
+    throw new ApiErrorHandler(400, "email and fullname invalid");
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        fullName,
+        email,
+      },
+    },
+    { new: true }
+  ).select("-password");
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, "Account detail successFully Updated", updatedUser)
+    );
+});
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  updateRefreshAccessToken,
+  updatePassord,
+  getCurrentUser,
+  updateUserAccountDetails,
+};

@@ -49,10 +49,12 @@ const userSchema = new Schema(
 );
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
+  console.log("line 52", this.password);
   this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 userSchema.methods.isPasswordCorrect = async function (password) {
-  return await bcrypt.compare(this.password, password);
+  return await bcrypt.compare(password, this.password);
 };
 userSchema.methods.generateAccessToken = function () {
   return Jwt.sign(
