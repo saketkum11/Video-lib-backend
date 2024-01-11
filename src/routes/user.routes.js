@@ -8,6 +8,7 @@ import {
   getCurrentUser,
   updateUserAccountDetails,
   updateUserAvatar,
+  updateCoverImage,
 } from "../controllers/user.controller.js";
 import { upload } from "../middleware/multer.middleware.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
@@ -35,4 +36,7 @@ routers.route("/update-detail").post(verifyJWT, updateUserAccountDetails);
 routers
   .route("/update-avatar")
   .post(verifyJWT, upload.single("avatar"), updateUserAvatar);
+routers
+  .route("/update-coverimage")
+  .post(verifyJWT, upload.single("coverImage"), updateCoverImage);
 export default routers;

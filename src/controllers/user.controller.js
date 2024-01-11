@@ -218,7 +218,6 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiErrorHandler(400, "Avatar image not found");
   }
   const uploadeToCloud = await uploadOnCloudinary(avatar);
-  console.log(avatar, uploadeToCloud);
   if (!uploadeToCloud) {
     throw new ApiErrorHandler(400, "Error while uploading");
   }
@@ -235,6 +234,28 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, "Uploaded avatar", uploadAvatarUrl));
 });
+const updateCoverImage = asyncHandler(async (req, res) => {
+  const coverImage = req.file?.path;
+  if (!coverImage) {
+    throw new ApiErrorHandler(400, "coverImage image not found");
+  }
+  const uploadeToCloud = await uploadOnCloudinary(coverImage);
+  if (!uploadeToCloud) {
+    throw new ApiErrorHandler(400, "Error while uploading");
+  }
+  const uploadcoverImageUrl = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        coverImage: uploadeToCloud.url,
+      },
+    },
+    { new: false }
+  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Uploaded avatar", uploadcoverImageUrl));
+});
 export {
   registerUser,
   loginUser,
@@ -244,4 +265,5 @@ export {
   getCurrentUser,
   updateUserAccountDetails,
   updateUserAvatar,
+  updateCoverImage,
 };
