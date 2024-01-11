@@ -28,7 +28,6 @@ const registerUser = asyncHandler(async (req, res) => {
   // remove password , refresh token from response send
   // check whether user created or not in database
   // return response
-  console.log(req);
   const { fullName, username, email, password } = req.body;
   if (
     [fullName, username, email, password].some((field) => field?.trim() === "")
@@ -213,6 +212,29 @@ const updateUserAccountDetails = asyncHandler(async (req, res) => {
       new ApiResponse(200, "Account detail successFully Updated", updatedUser)
     );
 });
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  const avatar = req.file?.path;
+  if (!avatar) {
+    throw new ApiErrorHandler(400, "Avatar image not found");
+  }
+  const uploadeToCloud = await uploadOnCloudinary(avatar);
+  console.log(avatar, uploadeToCloud);
+  if (!uploadeToCloud) {
+    throw new ApiErrorHandler(400, "Error while uploading");
+  }
+  const uploadAvatarUrl = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        avatar: uploadeToCloud.url,
+      },
+    },
+    { new: false }
+  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Uploaded avatar", uploadAvatarUrl));
+});
 export {
   registerUser,
   loginUser,
@@ -221,4 +243,5 @@ export {
   updatePassord,
   getCurrentUser,
   updateUserAccountDetails,
+  updateUserAvatar,
 };
