@@ -229,7 +229,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
       },
     },
     { new: false }
-  );
+  ).select("-password");
   return res
     .status(200)
     .json(new ApiResponse(200, "Uploaded avatar", uploadAvatarUrl));
@@ -251,7 +251,7 @@ const updateCoverImage = asyncHandler(async (req, res) => {
       },
     },
     { new: false }
-  );
+  ).select("-password");
   return res
     .status(200)
     .json(new ApiResponse(200, "Uploaded avatar", uploadcoverImageUrl));
