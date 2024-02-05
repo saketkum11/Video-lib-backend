@@ -10,7 +10,7 @@ app.use(cookieParser());
 
 // import routers from routes
 import userRouter from "./routes/user.routes.js";
-import { verifyJWT } from "./middleware/auth.middleware.js";
-
+import commentRouter from "./routes/comment.routes.js";
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/comments", commentRouter);
 export { app };

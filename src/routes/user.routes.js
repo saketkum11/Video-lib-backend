@@ -16,6 +16,7 @@ import { upload } from "../middleware/multer.middleware.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 
 const routers = Router();
+routers.use(verifyJWT);
 routers.route("/register").post(
   upload.fields([
     {
@@ -31,16 +32,14 @@ routers.route("/register").post(
 );
 routers.route("/login").post(loginUser);
 routers.route("/logout").post(logoutUser);
-routers.route("/refresh-token").post(verifyJWT, updateRefreshAccessToken);
-routers.route("/update-password").post(verifyJWT, updatePassord);
-routers.route("/current-user").get(verifyJWT, getCurrentUser);
-routers.route("/update-detail").post(verifyJWT, updateUserAccountDetails);
-routers
-  .route("/update-avatar")
-  .post(verifyJWT, upload.single("avatar"), updateUserAvatar);
+routers.route("/refresh-token").post(updateRefreshAccessToken);
+routers.route("/update-password").post(updatePassord);
+routers.route("/current-user").get(getCurrentUser);
+routers.route("/update-detail").post(updateUserAccountDetails);
+routers.route("/update-avatar").post(upload.single("avatar"), updateUserAvatar);
 routers
   .route("/update-coverimage")
-  .post(verifyJWT, upload.single("coverImage"), updateCoverImage);
-routers.route("/get-channel/:username").get(verifyJWT, getUserChannelProfile);
-routers.route("/watch-history").get(verifyJWT, getWatchedHistory);
+  .post(upload.single("coverImage"), updateCoverImage);
+routers.route("/get-channel/:username").get(getUserChannelProfile);
+routers.route("/watch-history").get(getWatchedHistory);
 export default routers;
