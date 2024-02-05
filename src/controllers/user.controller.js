@@ -256,8 +256,11 @@ const updateCoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Uploaded avatar", uploadcoverImageUrl));
 });
 const getUserChannelProfile = asyncHandler(async (req, res) => {
-  console.log("call backe happend");
   const { username } = req.params;
+
+  if (!username) {
+    throw new ApiErrorHandler(401, "Username is undefined");
+  }
 
   const channel = await User.aggregate([
     {
@@ -289,12 +292,38 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         channel: {
           $size: "$subscribeTo",
         },
+        isSubScribed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$subscriber.subscriber"] },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        fullName: 1,
+        username: 1,
+        email: 1,
+        subscriberCount: 1,
+        subscribeTo: 1,
+        isSubScribed: 1,
+        avatar: 1,
+        coverImage: 1,
       },
     },
   ]);
-  console.log("user from 294", channel);
-  res.status(201).json(channel);
+  if (!channel.length) {
+    throw new ApiErrorHandler(404, "Channel doesn't Exists");
+  }
+  res
+    .status(201)
+    .json(
+      new ApiResponse(200, "User Channel Fetched Successfully", channel[0])
+    );
 });
+const getWatchedHistory = asyncHandler(async (req, res) => {});
 export {
   registerUser,
   loginUser,

@@ -30,13 +30,15 @@ routers.route("/register").post(
 );
 routers.route("/login").post(loginUser);
 routers.route("/logout").post(logoutUser);
-routers.route("/refresh-token").post(updateRefreshAccessToken);
-routers.route("/update-password").post(updatePassord);
-routers.route("/current-user").get(getCurrentUser);
-routers.route("/update-detail").post(updateUserAccountDetails);
-routers.route("/update-avatar").post(upload.single("avatar"), updateUserAvatar);
+routers.route("/refresh-token").post(verifyJWT, updateRefreshAccessToken);
+routers.route("/update-password").post(verifyJWT, updatePassord);
+routers.route("/current-user").get(verifyJWT, getCurrentUser);
+routers.route("/update-detail").post(verifyJWT, updateUserAccountDetails);
+routers
+  .route("/update-avatar")
+  .post(verifyJWT, upload.single("avatar"), updateUserAvatar);
 routers
   .route("/update-coverimage")
-  .post(upload.single("coverImage"), updateCoverImage);
-routers.route("/get-channel/:username").get(getUserChannelProfile);
+  .post(verifyJWT, upload.single("coverImage"), updateCoverImage);
+routers.route("/get-channel/:username").get(verifyJWT, getUserChannelProfile);
 export default routers;
