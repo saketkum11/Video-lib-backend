@@ -140,7 +140,6 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 const updateRefreshAccessToken = asyncHandler(async (req, res) => {
   const incomingToken = req.cookies.refreshToken || req.body.refreshToken;
-
   if (!incomingToken) {
     throw new ApiErrorHandler(401, "unauthories token");
   }
@@ -256,6 +255,46 @@ const updateCoverImage = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, "Uploaded avatar", uploadcoverImageUrl));
 });
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  console.log("call backe happend");
+  const { username } = req.params;
+
+  const channel = await User.aggregate([
+    {
+      $match: {
+        username: username?.toLowerCase(),
+      },
+    },
+    {
+      $lookup: {
+        from: "subcriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscriber",
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscribeTo",
+      },
+    },
+    {
+      $addFields: {
+        subcribeCount: {
+          $size: "$subscriber",
+        },
+        channel: {
+          $size: "$subscribeTo",
+        },
+      },
+    },
+  ]);
+  console.log("user from 294", channel);
+  res.status(201).json(channel);
+});
 export {
   registerUser,
   loginUser,
@@ -266,4 +305,5 @@ export {
   updateUserAccountDetails,
   updateUserAvatar,
   updateCoverImage,
+  getUserChannelProfile,
 };
