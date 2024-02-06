@@ -54,5 +54,34 @@ const getVideoById = asyncHandler(async (req, res) => {
     .status(201)
     .json(new ApiResponse(201, "Video fetch Successfully", video));
 });
-
-export { getVideo, uploadVideo, getVideoById };
+const deleteVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!videoId) {
+    throw new ApiErrorHandler(403, "Invalid VideoId");
+  }
+  await Video.findByIdAndDelete(videoId);
+  res.status(200).json(new ApiResponse(200, "Successfully deleted"));
+});
+const togglePublishedStatus = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  console.log("worked", videoId);
+  /*
+  if (!videoId) {
+    throw new ApiErrorHandler(403, "Invalid VideoId");
+  }
+  const video = await Video.findByIdAndUpdate(videoId, {
+    $set: {
+      isPublished: false,
+    },
+  });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "updated published status", video));*/
+});
+export {
+  getVideo,
+  uploadVideo,
+  getVideoById,
+  deleteVideo,
+  togglePublishedStatus,
+};
