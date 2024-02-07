@@ -4,10 +4,24 @@ import { ApiErrorHandler } from "../utils/ApiErrorHandler.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 import { Video } from "./../models/video.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-const getVideo = asyncHandler(async (req, res) => {
+import { User } from "../models/user.model.js";
+const getAllVideo = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+  if (!userId) {
+    throw new ApiErrorHandler(403, "Invalid userId");
+  }
+  const userVideo = await User.findById(userId);
+  const video = await Video.aggregate([
+    {
+      $match: {
+        owner: userId,
+      },
+    },
+  ]);
+  console.log("from getAllVideo", userVideo, video);
 });
 const uploadVideo = asyncHandler(async (req, res) => {
+  console.log(req.user?._id);
   const { title, description } = req.body;
   if (!title && !description) {
     throw new ApiErrorHandler(401, "title and description does not exit ");
@@ -36,6 +50,7 @@ const uploadVideo = asyncHandler(async (req, res) => {
     thumbnail: uploadThumbnailToCloudinary.url,
     videoFile: uploadVideoToCloudinary.url,
     duration: videoDuration,
+    owner: req.user?._id,
   });
   return res
     .status(201)
@@ -65,23 +80,35 @@ const deleteVideo = asyncHandler(async (req, res) => {
 const togglePublishedStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   console.log("worked", videoId);
-  /*
+
   if (!videoId) {
     throw new ApiErrorHandler(403, "Invalid VideoId");
   }
-  const video = await Video.findByIdAndUpdate(videoId, {
-    $set: {
-      isPublished: false,
+  const video = await Video.findByIdAndUpdate(
+    videoId,
+    {
+      $set: {
+        isPublished: false,
+      },
     },
-  });
+    { new: true }
+  );
   return res
     .status(200)
-    .json(new ApiResponse(200, "updated published status", video));*/
+    .json(new ApiResponse(200, "updated published status", video));
+});
+const updateVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!videoId) {
+    throw new ApiErrorHandler(403, "Invalid VideoId");
+  }
+  console.log(videoId);
 });
 export {
-  getVideo,
   uploadVideo,
   getVideoById,
   deleteVideo,
   togglePublishedStatus,
+  updateVideo,
+  getAllVideo,
 };
