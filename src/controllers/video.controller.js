@@ -5,20 +5,39 @@ import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 import { Video } from "./../models/video.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
+import mongoose from "mongoose";
 const getAllVideo = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
   if (!userId) {
     throw new ApiErrorHandler(403, "Invalid userId");
   }
-  const userVideo = await User.findById(userId);
   const video = await Video.aggregate([
     {
       $match: {
-        owner: userId,
+        owner: new mongoose.Types.ObjectId(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [
+          {
+            $project: {
+              fullName: 1,
+              email: 1,
+              avatar: 1,
+            },
+          },
+        ],
       },
     },
   ]);
-  console.log("from getAllVideo", userVideo, video);
+  return res
+    .status(201)
+    .json(new ApiResponse(201, "videos fetched successfully", video));
 });
 const uploadVideo = asyncHandler(async (req, res) => {
   console.log(req.user?._id);
