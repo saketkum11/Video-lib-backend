@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const commentSchema = new Schema(
   {
-    conten: {
+    content: {
       type: String,
       require: true,
     },
