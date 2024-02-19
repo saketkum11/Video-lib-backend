@@ -38,9 +38,7 @@ const getComment = asyncHandler(async (req, res) => {
         ],
       },
     },
-    {
-      $,
-    },
+
     {
       $project: {
         content: 1,
