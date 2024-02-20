@@ -3,14 +3,13 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { Comment } from "../models/comment.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Video } from "../models/video.model.js";
-import mongoose from "mongoose";
-import { validateId } from "../utils/validateID.js";
+import mongoose, { isValidObjectId } from "mongoose";
 const getComment = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   if (!videoId) {
     throw new ApiErrorHandler(403, "Invalid videoId");
   }
-  const checkVideoId = validateId(videoId);
+  const checkVideoId = isValidObjectId(videoId);
   if (!checkVideoId) {
     throw new ApiErrorHandler(403, "video id is invalid");
   }
@@ -62,7 +61,7 @@ const addComment = asyncHandler(async (req, res) => {
   if (!videoId && !content) {
     throw new ApiErrorHandler(403, "Invalid VideoId and content");
   }
-  const checkId = validateId(videoId);
+  const checkId = isValidObjectId(videoId);
   if (!checkId) {
     throw new ApiErrorHandler(403, "Invalid VideoID");
   }
@@ -87,7 +86,7 @@ const deleteComment = asyncHandler(async (req, res) => {
   if (!commentId) {
     throw new ApiErrorHandler(403, "Invalid commentId");
   }
-  const checkCommentId = validateId(commentId);
+  const checkCommentId = isValidObjectId(commentId);
   if (!checkCommentId) {
     throw new ApiErrorHandler(403, "commentID is invalid id");
   }
@@ -109,7 +108,7 @@ const updateComment = asyncHandler(async (req, res) => {
   if (!commentId && !content) {
     throw new ApiErrorHandler(403, "Invalid commentId");
   }
-  const checkCommentId = validateId(commentId);
+  const checkCommentId = isValidObjectId(commentId);
   if (!checkCommentId) {
     throw new ApiErrorHandler(403, "commentID is invalid id");
   }
