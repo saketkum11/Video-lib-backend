@@ -43,6 +43,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const avatar = req.files?.avatar[0]?.path;
+  console.log(avatar);
   let coverImageLocalPath;
   if (
     req.files &&
@@ -79,6 +80,7 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password, username } = req.body;
+
   if (!username && !email) {
     throw new ApiErrorHandler(400, "username or email is required");
   }
@@ -100,6 +102,9 @@ const loginUser = asyncHandler(async (req, res) => {
   const loggedInUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
+  if (accessToken) {
+    return res.status(200).json(new ApiResponse(200, "User already LoggedIn"));
+  }
   const options = {
     httpOnly: true,
     secure: true,

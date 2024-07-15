@@ -8,7 +8,7 @@ dotenv.config({
 connectDataBaseMongoDB()
   .then(() => {
     app.listen(process.env.PORT, () => {
-      console.log("Server Started ");
+      console.log("Server Started ", process.env.PORT);
     });
   })
   .catch((error) => {
