@@ -1,9 +1,11 @@
-import "./App.css";
-import AppRoute from "./appRoute/AppRoute";
+import AppRoute from "./AppRoute/AppRoute";
+
 function App() {
   return (
     <>
-      <AppRoute />
+      <div className="bg-black min-h-screen">
+        <AppRoute />
+      </div>
     </>
   );
 }
