@@ -26,5 +26,7 @@ app.use("/api/v1/subscriptions", subscriptionRoutes);
 app.get("/home",(req,res)=>{
     return res.json("hello worl")
 })
-
+app.get("/",(req,res)=>{
+    return res.json("hello Welcome to video library  app")
+})
 export { app };
