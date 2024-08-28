@@ -10,7 +10,7 @@
   "author": "Saket kumar",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.0.1",
+    "nodemon": "^3.1.4",
     "prettier": "^3.1.0"
   },
   "dependencies": {

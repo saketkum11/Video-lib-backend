@@ -124,7 +124,7 @@ const updateComment = asyncHandler(async (req, res) => {
       },
     },
     { new: true }
-  );
-  return res.status(201).json(new ApiResponse(201, "Update Comment", comment));
+  ).select("-video -_id");
+  return res.status(201).json(new ApiResponse(201, "Updated Comment", comment));
 });
 export { getComment, addComment, deleteComment, updateComment };

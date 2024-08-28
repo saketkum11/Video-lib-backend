@@ -79,6 +79,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdUser, "Succesfully Created user"));
 });
 const loginUser = asyncHandler(async (req, res) => {
+  
   const { email, password, username } = req.body;
 
   if (!username && !email) {
@@ -98,13 +99,12 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const getAccessToken = await generateAccessAndRefreshToken(user._id);
   const { accessToken, refreshToken } = getAccessToken;
-
+ console.log(getAccessToken);
+ 
   const loggedInUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
-  if (accessToken) {
-    return res.status(200).json(new ApiResponse(200, "User already LoggedIn"));
-  }
+
   const options = {
     httpOnly: true,
     secure: true,
@@ -117,12 +117,12 @@ const loginUser = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        {
+       
+        "Successfully LoggedIn", {
           user: loggedInUser,
           accessToken,
           refreshToken,
-        },
-        "Successfully LoggedIn"
+        }
       )
     );
 });
@@ -142,10 +142,11 @@ const logoutUser = asyncHandler(async (req, res) => {
     .status(200)
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
-    .json(new ApiResponse(200, {}, "User Logged Out"));
+    .json(new ApiResponse(200,  "User Logged Out",{}));
 });
 const updateRefreshAccessToken = asyncHandler(async (req, res) => {
   const incomingToken = req.cookies.refreshToken || req.body.refreshToken;
+  
   if (!incomingToken) {
     throw new ApiErrorHandler(401, "unauthories token");
   }
@@ -192,7 +193,7 @@ const updatePassord = asyncHandler(async (req, res) => {
   user.save({ validateBeforeSave: false });
   return res
     .status(200)
-    .json(new ApiResponse(200, "SuccessFully Changed Password", user));
+    .json(new ApiResponse(200, "SuccessFully Changed Password"));
 });
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(201, "User data", req.user));
@@ -210,11 +211,14 @@ const updateUserAccountDetails = asyncHandler(async (req, res) => {
       },
     },
     { new: true }
-  ).select("-password");
+  ).select("-password ");
   return res
     .status(200)
     .json(
-      new ApiResponse(200, "Account detail successFully Updated", updatedUser)
+      new ApiResponse(200, "Account detail successFully Updated", {
+        email: updatedUser.email,
+        fullName: updatedUser.fullName
+      })
     );
 });
 const updateUserAvatar = asyncHandler(async (req, res) => {
@@ -237,7 +241,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   ).select("-password");
   return res
     .status(200)
-    .json(new ApiResponse(200, "Uploaded avatar", uploadAvatarUrl));
+    .json(new ApiResponse(200, "Uploaded avatar"));
 });
 const updateCoverImage = asyncHandler(async (req, res) => {
   const coverImage = req.file?.path;
@@ -259,7 +263,7 @@ const updateCoverImage = asyncHandler(async (req, res) => {
   ).select("-password");
   return res
     .status(200)
-    .json(new ApiResponse(200, "Uploaded avatar", uploadcoverImageUrl));
+    .json(new ApiResponse(200, "Uploaded coverImage"));
 });
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;

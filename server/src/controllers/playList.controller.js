@@ -6,6 +6,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 const createPlaylist = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
+  console.log("hello world");
+  
   if (!name && !description) {
     throw new ApiErrorHandler(403, "Invalid Name and description");
   }
@@ -23,7 +25,8 @@ const createPlaylist = asyncHandler(async (req, res) => {
 });
 const getPlaylistById = asyncHandler(async (req, res) => {
   const { playlistId } = req.params;
-  if (!isValidObjectId(playlistId)) {
+  console.log("from the getPlaylistbyid", playlistId)
+  if (!playlistId) {
     throw new ApiErrorHandler(403, "Invalid id");
   }
   const playlist = await PlayList.aggregate([
@@ -31,76 +34,31 @@ const getPlaylistById = asyncHandler(async (req, res) => {
       $match: {
         _id: new mongoose.Types.ObjectId(playlistId),
       },
-    },
-    {
-      $lookup: {
-        from: "videos",
-        localField: "video",
-        foreignField: "_id",
-        as: "video",
+    },{
+      $lookup:{
+        from:"users",
+        localField:"owner",
+        foreignField:"_id",
+        as:"owner" ,
+        pipeline:[{
+          $project:{
+            _id: 0,
+            fullName:1,
+            email:1
+          }
+        }]
       },
-    },
-    {
-      $match: {
-        "video.isPublished": true,
-      },
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "owner",
-        foreignField: "_id",
-        as: "owner",
-        pipeline: [
-          {
-            $project: {
-              _id: 1,
-              fullName: 1,
-              email: 1,
-              username: 1,
-              avatar: 1,
-            },
-          },
-        ],
-      },
-    },
-    {
-      $addFields: {
-        totalVideo: {
-          $size: "$video",
-        },
-        totalViews: {
-          $sum: "$video.view",
-        },
-        owner: {
-          $first: "$owner",
-        },
-      },
-    },
-    {
-      $project: {
-        _id: 1,
-        name: 1,
-        description: 1,
-        updatedAt: 1,
-        totalVideo: 1,
-        totalViews: 1,
-        owner: 1,
-        video: {
-          _id: 1,
-          videoFile: 1,
-          thumbnail: 1,
-          title: 1,
-          description: 1,
-          duration: 1,
-          view: 5000,
-          isPublished: true,
-          createdAt: 1,
-          updatedAt: 1,
-        },
-      },
-    },
+    },{$unwind:"$owner"},{
+      $lookup:{
+        from:"videos",
+        localField:"video",
+        foreignField:"_id",
+        as:"video"
+      }
+    }
+
   ]);
+  console.log("playlist", playlist)
   if (!playlist) {
     throw new ApiErrorHandler(500, "Failed to fetch playlist");
   }

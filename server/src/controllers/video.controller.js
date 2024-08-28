@@ -7,14 +7,11 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
 const getAllVideo = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
-  if (!userId) {
-    throw new ApiErrorHandler(403, "Invalid userId");
-  }
+ 
   const video = await Video.aggregate([
     {
       $match: {
-        owner: new mongoose.Types.ObjectId(userId),
+        owner: new mongoose.Types.ObjectId(req.user._id),
       },
     },
     {
